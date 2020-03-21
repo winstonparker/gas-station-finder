@@ -1,5 +1,5 @@
 {
-  "name":"Gas Station Locator ",
+  "name":"Gas Station Locator",
   "id":"91852939",
   "template": "DriverFirst",
   "theme" : {"primary": "#00C0FF"},
@@ -7,7 +7,7 @@
   "src": "src",
   "dist": "dist",
   "main": "app.js",
-  "icon": "Icon.png",
+  "icon": "icon.png",
   "developer": "Winston Parker",
   "category": "General",
   "type": "RemoteHigh",

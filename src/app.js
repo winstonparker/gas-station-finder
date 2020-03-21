@@ -40,7 +40,7 @@ ngi.flow('myFlow', {
   });
 
 ngi.cards('myFlow.myView', {
-  title: 'Hello World!',
+  title: 'Gas Station Locator',
   // Many layouts are responsive to the content they are rendering.
   // Try uncommenting the next line and see how the layout responds.
   // images: ['./images/otterlyadorable.jpg'],
