@@ -1,5 +1,5 @@
 # Gas Station Finder
-This application uses the Driver First Framework and the NGI Emulator to locate gas stations near a driver.
+This application finds the nearest gas stations to a user's current location. It is built using the Driver First Framework and the NGI Emulator. It makes a HTTP request to the National Renewable Energy Laboratory's developer network to get a list of nearby gas stations.
 
 ## Functionality
 * List gas stations in the area
