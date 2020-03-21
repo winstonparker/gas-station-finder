@@ -1,0 +1,17 @@
+{
+  "name":"Gas Station Locator ",
+  "id":"91852939",
+  "template": "DriverFirst",
+  "theme" : {"primary": "#00C0FF"},
+  "version": "0.0.0",
+  "src": "src",
+  "dist": "dist",
+  "main": "app.js",
+  "icon": "Icon.png",
+  "developer": "Winston Parker",
+  "category": "General",
+  "type": "RemoteHigh",
+  "description": "Generated on 3/21/2020, 4:18:06 PM by ngi-sdk version ",
+  "trusted": true,
+  "dffVersion": "1.6.0-alpha"
+}
