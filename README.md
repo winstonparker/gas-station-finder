@@ -14,4 +14,4 @@ The application makes an HTTP request to the National Renewable Energy Laborator
 1. Open the NGI Emulator.
 2. File -> Open App
 3. Select the directory containing these files.
-4. Ensure you a persistent internet connection. 
+4. Ensure you have a persistent internet connection. 
