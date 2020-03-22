@@ -9,3 +9,9 @@ This application finds the nearest gas stations to a user's current location. It
 
 ## Nearest Gas Station API
 The application makes an HTTP request to the National Renewable Energy Laboratory's developer network to find a list of the closest gas stations to the driver. For documentation, please visit: https://developer.nrel.gov/docs/transportation/alt-fuel-stations-v1/nearest/
+
+## Getting Started
+1. Open the NGI Emulator.
+2. File -> Open App
+3. Select the directory containing these files.
+4. Ensure you a persistent internet connection. 
