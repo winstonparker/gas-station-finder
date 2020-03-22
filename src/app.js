@@ -1,5 +1,27 @@
+var remote = {
+  getStationData: function (lat, lng) {
+    return ngi.http.get(`https://developer.nrel.gov/api/alt-fuel-stations/v1/nearest.json?limit=10&api_key=cgikuqoeKNuhs0V371QmsjnKPBUgsraymWFHjWcv&format=JSON&latitude=${lat}&longitude=${lng}&radius=50&status=E&fuel_type=E85`).then(function (response) {
+      var data = response.payload.fuel_stations;
+      return data;
+    }).catch(function (error) {
+      console.log("Error:", error);
+    });
+  },
+  getPostionData: function () {
+    return new Promise(function (resolve) {
+      gm.info.getCurrentPosition(function (position) {
+        var lat = position.coords.latitude.toFixed(8);
+        var lng = position.coords.longitude.toFixed(8);
+        resolve({
+          lat: lat,
+          lng: lng
+        });
+      }, true);
+    });
+  }
+}
 
-
+var stations = [];
 
 var terms = require("./terms.json");
 // Load each term into built-in flow context for Terms & Conditions.
@@ -15,37 +37,55 @@ ngi.flow('myFlow', {
   })
   .addRoute('welcomeScreen', {
     layout: 'Detail',
-    action: function() {
-      // We include Lodash with the DFF as well!
-      var bodyText = _.get(this, 'body');
-      ngi.vehicle.speak(bodyText);
+    links: {
+      neighbors: ['stationList']
     },
-    // Views can have actions too!
-    // Press the button and take a look in your developer console.
-    // The DFF provides context-based navigation and rendering information,
-    //   all on the 'this' property of your functions.
-
     actions: [{
       label: 'Locate Nearby Stations',
-      action: function() {
-        console.log('HI!!!!', this);
-        // We include Lodash with the DFF as well!
-        var bodyText = _.get(this, 'content.body');
-        ngi.vehicle.speak(bodyText);
+      action: function () {
+        this.route('stationList');
       }
     }]
+  }).addRoute('stationList', {
+    layout: 'VerticalList',
+    title: 'Select a Nearby Gas Station',
+    links: {
+      back: 'welcomeScreen'
+    },
+    beforeEnter: function () {
+      var self = this;
+      return remote.getPostionData().then(function (pos) {
+        return remote.getStationData(pos.lat, pos.lng).then(function(data){
+          stations = data.map(function(station) {
+            var stationDistanceInMiles = station.distance.toFixed(2);
+            return {
+              title: `${station.station_name} - ${stationDistanceInMiles} miles`,
+            };
+          });
+          ngi.cards("myFlow.stationList", stations);
+
+        }).catch(function (err) {
+          console.log("Error", err);
+          return Promise.reject(err);
+        })
+      }).catch(function (err) {
+        console.log("Error", err);
+        return Promise.reject(err);
+      })
+    },
   });
 
 ngi.cards('myFlow.welcomeScreen', {
   title: 'Gas Station Locator',
-  // images: ['./images/otterlyadorable.jpg'],
-
-  // The following tags are allowed: <b>, <i>, <p>, <br>, <u>, <em>, <strong>, <pre>, <span>.
-  // The following classes are allowed: text-left, text-right, text-center, light, medium, bold.
   body: '<p>Welcome to the Gas Station Locator. This application finds the 10 closest gas stations to your current position.</p>',
-
 });
+
+
+
+
+
+
+// ngi.cards('myFlow.stationList', {});
 
 // Specify your own entry flow, this will connect to Splash, Terms, and About.
 ngi.init('myFlow');
-
