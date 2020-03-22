@@ -1,3 +1,4 @@
+//HTTP and GPS Requests
 var remote = {
   getStationData: function (lat, lng) {
     return ngi.http.get(`https://developer.nrel.gov/api/alt-fuel-stations/v1/nearest.json?limit=10&api_key=cgikuqoeKNuhs0V371QmsjnKPBUgsraymWFHjWcv&format=JSON&latitude=${lat}&longitude=${lng}&radius=50&status=E&fuel_type=E85`).then(function (response) {
@@ -21,6 +22,7 @@ var remote = {
   }
 }
 
+//Called when using the vehicle nav system
 var navigate = function (destination) {
   gm.nav.setDestination(success, failure, destination, true);
 
@@ -41,12 +43,13 @@ var navigate = function (destination) {
   }
 }
 
+//Save Station Data and Selected Index
 var stations = [];
 var stationDataList = [];
 var stationIndex = 0;
 
-var terms = require("./terms.json");
 // Load each term into built-in flow context for Terms & Conditions.
+var terms = require("./terms.json");
 ngi.cards("_ngi:terms", terms);
 
 // Define the Splash screen.
@@ -54,6 +57,7 @@ ngi.cards('_ngi:init.splash', {
   icon: './images/splash.png'
 });
 
+//Setup the flow
 ngi.flow('myFlow', {
     entry: 'welcomeScreen' // The first view the task will load.
   })
@@ -84,7 +88,6 @@ ngi.flow('myFlow', {
       }
     }],
     beforeEnter: function () {
-      var self = this;
       return remote.getPostionData().then(function (pos) {
         return remote.getStationData(pos.lat, pos.lng).then(function (data) {
           var dataLimit = data.slice(0, 10);
@@ -134,7 +137,6 @@ ngi.flow('myFlow', {
     },
   })
 
-
 ngi.cards('myFlow.welcomeScreen', {
   title: 'Gas Station Locator',
   body: '<p>Welcome to the Gas Station Locator. This application finds the 10 closest gas stations to your current position.</p>',
@@ -145,8 +147,5 @@ ngi.cards('myFlow.infoScreen', {
   body: '<p>This is a generic info screen.</p>',
 });
 
-
-// ngi.cards('myFlow.stationList', {});
-
-// Specify your own entry flow, this will connect to Splash, Terms, and About.
+// Entry flow, this will connect to Splash, Terms, and About.
 ngi.init('myFlow');
