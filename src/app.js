@@ -10,8 +10,8 @@ var remote = {
   getPostionData: function () {
     return new Promise(function (resolve) {
       gm.info.getCurrentPosition(function (position) {
-        var lat = position.coords.latitude.toFixed(8);
-        var lng = position.coords.longitude.toFixed(8);
+        var lat = position.coords.latitude.toFixed(6);
+        var lng = position.coords.longitude.toFixed(6);
         resolve({
           lat: lat,
           lng: lng
@@ -21,7 +21,29 @@ var remote = {
   }
 }
 
+var navigate = function (destination) {
+  gm.nav.setDestination(success, failure, destination, true);
+
+  function success() {
+    console.log('Destination has been set');
+    var alertTile = `The Destination Has Been Set`;
+    var alertDetail = `Please check the Emulator Toolbar Map.`
+    gm.ui.showAlert({
+      alertTitle: alertTile,
+      alertDetail: alertDetail,
+      primaryButtonText: 'Close',
+      primaryAction: function closeAlert() {}
+    });
+  }
+
+  function failure(err) {
+    console.log('Error:', err);
+  }
+}
+
 var stations = [];
+var stationDataList = [];
+var stationIndex = 0;
 
 var terms = require("./terms.json");
 // Load each term into built-in flow context for Terms & Conditions.
@@ -50,19 +72,30 @@ ngi.flow('myFlow', {
     layout: 'VerticalList',
     title: 'Select a Nearby Gas Station',
     links: {
-      back: 'welcomeScreen'
+      back: 'welcomeScreen',
+      neighbors: ['infoScreen']
     },
+    listActions: [{
+      label: 'Select',
+      action: function (index) {
+        console.log(index);
+        stationIndex = index;
+        this.route('infoScreen');
+      }
+    }],
     beforeEnter: function () {
       var self = this;
       return remote.getPostionData().then(function (pos) {
-        return remote.getStationData(pos.lat, pos.lng).then(function(data){
-          stations = data.map(function(station) {
+        return remote.getStationData(pos.lat, pos.lng).then(function (data) {
+          var dataLimit = data.slice(0, 10);
+          stations = dataLimit;
+          stationDataList = dataLimit.map(function (station) {
             var stationDistanceInMiles = station.distance.toFixed(2);
             return {
-              title: `${station.station_name} - ${stationDistanceInMiles} miles`,
+              title: `${station.station_name} - ${stationDistanceInMiles} miles`
             };
           });
-          ngi.cards("myFlow.stationList", stations);
+          ngi.cards("myFlow.stationList", stationDataList, true);
 
         }).catch(function (err) {
           console.log("Error", err);
@@ -73,16 +106,44 @@ ngi.flow('myFlow', {
         return Promise.reject(err);
       })
     },
-  });
+  }).addRoute('infoScreen', {
+    layout: 'Detail',
+    links: {
+      back: 'stationList'
+    },
+    actions: [{
+      label: 'Navigate to Station',
+      action: function () {
+        var stationInfo = stations[stationIndex];
+        var destination = {
+          latitude: stationInfo.latitude,
+          longitude: stationInfo.longitude
+        };
+        navigate(destination);
+      }
+    }],
+    beforeEnter: function () {
+      var stationInfo = stations[stationIndex];
+      var infoCard = ngi.cards('myFlow.infoScreen').get(0).value();
+      ngi.util.set(infoCard, 'title', stationInfo.station_name);
+
+      var stationInfoBody = `<p>Distance: ${stationInfo.distance.toFixed(2)} Miles</p> <p>Position: ${stationInfo.latitude}, ${stationInfo.longitude}</p> <p>Hours: ${stationInfo.access_days_time}</p><p>Address: ${stationInfo.street_address}, ${stationInfo.city}, ${stationInfo.state}, ${stationInfo.zip}</p>`;
+      ngi.util.set(infoCard, 'body', stationInfoBody);
+
+
+    },
+  })
+
 
 ngi.cards('myFlow.welcomeScreen', {
   title: 'Gas Station Locator',
   body: '<p>Welcome to the Gas Station Locator. This application finds the 10 closest gas stations to your current position.</p>',
 });
 
-
-
-
+ngi.cards('myFlow.infoScreen', {
+  title: 'Info Screen',
+  body: '<p>This is a generic info screen.</p>',
+});
 
 
 // ngi.cards('myFlow.stationList', {});
